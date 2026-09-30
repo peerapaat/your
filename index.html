@@ -263,7 +263,7 @@
         <div class="flex items-center justify-center gap-2 text-white font-mono text-xs font-bold tracking-wider">
           <span class="animate-ping text-red-200">⚠️</span>
           <span>SYSTEM SELF-DESTRUCT IN: <span id="countdownSec" class="text-amber-300 text-sm font-bold">15</span>s</span>
-          <span class="animate-ping text-red-200">⚠️️</span>
+          <span class="animate-ping text-red-200">⚠️</span>
         </div>
       </div>
 
@@ -364,14 +364,14 @@
             </div>
           </div>
 
-          <!-- 4. วงล้อเสี่ยงดวง -->
+          <!-- 4. วงล้อเสี่ยงดวง (ขนาด 220 พร้อมโชว์ข้อความชัดเจน) -->
           <div id="wheelContainer" class="hidden relative z-20 w-full text-center font-mono pt-1">
             <h3 class="text-red-500 font-mali font-bold text-xs mb-0.5 glow-text-pink">🎉 ยินดีด้วย! ปลดล็อกสำเร็จ! 🎉</h3>
             <p class="text-[10px] text-red-200/80 font-kanit mb-3">หมุนวงล้อรับรางวัลพิเศษจากแฮกเกอร์!</p>
 
-            <div class="relative w-44 h-44 mx-auto mb-3 flex items-center justify-center red-cyber-frame rounded-full p-1.5">
-              <div class="absolute -top-3 z-40 text-red-500 text-2xl drop-shadow-[0_0_12px_#ff0000] animate-bounce">▼</div>
-              <canvas id="wheelCanvas" width="170" height="170" class="rounded-full shadow-inner"></canvas>
+            <div class="relative w-56 h-56 mx-auto mb-4 flex items-center justify-center red-cyber-frame rounded-full p-1.5">
+              <div class="absolute -top-4 z-40 text-red-500 text-3xl drop-shadow-[0_0_12px_#ff0000] animate-bounce">▼</div>
+              <canvas id="wheelCanvas" width="220" height="220" class="rounded-full shadow-inner"></canvas>
             </div>
 
             <div id="resultPrizeBox" class="hidden bg-red-950/90 border border-red-500 p-2.5 rounded-xl mb-1 animate-bounce shadow-lg">
@@ -839,27 +839,28 @@
       const ctx = canvas.getContext('2d');
       const arc = (2 * Math.PI) / prizes.length;
 
-      ctx.clearRect(0, 0, 170, 170);
+      ctx.clearRect(0, 0, 220, 220);
       for (let i = 0; i < prizes.length; i++) {
         ctx.beginPath();
         ctx.fillStyle = colors[i];
-        ctx.moveTo(85, 85);
-        ctx.arc(85, 85, 85, i * arc, (i + 1) * arc);
+        ctx.moveTo(110, 110);
+        ctx.arc(110, 110, 110, i * arc, (i + 1) * arc);
         ctx.fill();
 
         ctx.strokeStyle = "rgba(255, 51, 51, 0.8)";
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         ctx.save();
-        ctx.translate(85, 85);
+        ctx.translate(110, 110);
         ctx.rotate(i * arc + arc / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 10px Kanit";
+        ctx.font = "bold 11px Kanit";
         ctx.shadowColor = "#000000";
-        ctx.shadowBlur = 4;
-        ctx.fillText(prizes[i], 78, 3);
+        ctx.shadowBlur = 5;
+        // ปรับพิกัดให้ข้อความอยู่ตำแหน่งพอดี ไม่ตกขอบแคนวาส
+        ctx.fillText(prizes[i], 92, 4);
         ctx.restore();
       }
     }
