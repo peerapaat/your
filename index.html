@@ -847,7 +847,7 @@
       const size = 260;
       const center = 130;
       const radius = 126;
-      const textRadius = 78;
+      const textRadius = 91;
       const arc = (Math.PI * 2) / prizes.length;
 
       svg.innerHTML = "";
@@ -905,7 +905,7 @@
         text.setAttribute("y", ty);
         text.setAttribute("fill", "#ffffff");
         text.setAttribute("font-family", "Kanit, sans-serif");
-        text.setAttribute("font-size", "12");
+        text.setAttribute("font-size", "10");
         text.setAttribute("font-weight", "700");
         text.setAttribute("text-anchor", "middle");
         text.setAttribute("dominant-baseline", "middle");
@@ -945,8 +945,8 @@
           const tspan = document.createElementNS(NS, "tspan");
           tspan.setAttribute("x", tx);
           tspan.setAttribute("dy", index === 0
-            ? (lines.length === 1 ? "0" : "-6")
-            : "12");
+            ? (lines.length === 1 ? "0" : "-5")
+            : "10");
           tspan.textContent = line;
           text.appendChild(tspan);
         });
