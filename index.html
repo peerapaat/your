@@ -836,37 +836,86 @@
     function drawWheel() {
       const canvas = document.getElementById('wheelCanvas');
       if (!canvas) return;
+
       const ctx = canvas.getContext('2d');
+      const size = canvas.width;
+      const center = size / 2;
+      const radius = center - 2;
       const arc = (2 * Math.PI) / prizes.length;
 
-      ctx.clearRect(0, 0, 220, 220);
+      ctx.clearRect(0, 0, size, size);
+
+      // วาดวงล้อ
       for (let i = 0; i < prizes.length; i++) {
+        const start = i * arc;
+        const end = (i + 1) * arc;
+
         ctx.beginPath();
         ctx.fillStyle = colors[i];
-        ctx.moveTo(110, 110);
-        ctx.arc(110, 110, 110, i * arc, (i + 1) * arc);
+        ctx.moveTo(center, center);
+        ctx.arc(center, center, radius, start, end);
+        ctx.closePath();
         ctx.fill();
 
-        ctx.strokeStyle = "rgba(255, 51, 51, 0.8)";
+        ctx.strokeStyle = "rgba(255, 51, 51, 0.9)";
         ctx.lineWidth = 2;
         ctx.stroke();
 
+        // ===== ข้อความในแต่ละช่อง =====
         ctx.save();
-        ctx.translate(110, 110);
-        ctx.rotate(i * arc + arc / 2);
-        ctx.textAlign = "right";
+        ctx.translate(center, center);
+
+        // หมุนข้อความให้อยู่ตามแนวรัศมีของช่อง
+        ctx.rotate(start + arc / 2);
+
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 11px Kanit";
-        ctx.shadowColor = "#000000";
-        ctx.shadowBlur = 5;
-        // ปรับพิกัดให้ข้อความอยู่ตำแหน่งพอดี ไม่ตกขอบแคนวาส
-        ctx.fillText(prizes[i], 92, 4);
+        ctx.font = 'bold 10px "Kanit", sans-serif';
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.shadowColor = "rgba(0,0,0,0.95)";
+        ctx.shadowBlur = 4;
+
+        // วางข้อความเข้ามาด้านใน ไม่ชิดขอบ
+        const textRadius = 67;
+        const maxWidth = 68;
+
+        // ตัดข้อความเป็น 2 บรรทัดถ้ายาวเกินไป
+        const words = prizes[i].split(" ");
+        const lines = [];
+        let line = "";
+
+        for (const word of words) {
+          const testLine = line ? line + " " + word : word;
+          if (ctx.measureText(testLine).width > maxWidth && line) {
+            lines.push(line);
+            line = word;
+          } else {
+            line = testLine;
+          }
+        }
+        if (line) lines.push(line);
+
+        // จำกัดไม่ให้เกิน 2 บรรทัด
+        const visibleLines = lines.slice(0, 2);
+        const lineHeight = 12;
+        const startY = -((visibleLines.length - 1) * lineHeight) / 2;
+
+        visibleLines.forEach((text, lineIndex) => {
+          ctx.fillText(text, textRadius, startY + lineIndex * lineHeight);
+        });
+
         ctx.restore();
       }
     }
 
-    function showWheelSection() {
+    async function showWheelSection() {
       document.getElementById('wheelContainer').classList.remove('hidden');
+
+      // รอ Kanit ให้โหลดก่อนวาดข้อความลง canvas
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
       drawWheel();
       confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
     }
