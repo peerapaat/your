@@ -115,8 +115,13 @@
     .glitch-intense { animation: glitchAnim 0.08s infinite !important; filter: invert(1) hue-rotate(180deg) contrast(200%) !important; }
     @keyframes glitchAnim { 0% { transform: translate(0); } 50% { transform: translate(-8px, 5px); } 100% { transform: translate(0); } }
 
-    #wheelCanvas { 
-      transition: transform 8s cubic-bezier(0.1, 0.95, 0.05, 1); 
+    #wheelCanvas {
+      display: block;
+      width: 260px;
+      height: 260px;
+      transform-origin: 50% 50%;
+      transition: transform 8s cubic-bezier(0.1, 0.95, 0.05, 1);
+      overflow: visible;
     }
 
     .red-cyber-frame {
@@ -371,7 +376,8 @@
 
             <div class="relative w-56 h-56 mx-auto mb-4 flex items-center justify-center red-cyber-frame rounded-full p-1.5">
               <div class="absolute -top-4 z-40 text-red-500 text-3xl drop-shadow-[0_0_12px_#ff0000] animate-bounce">▼</div>
-              <canvas id="wheelCanvas" width="220" height="220" class="rounded-full shadow-inner"></canvas>
+              <svg id="wheelCanvas" viewBox="0 0 260 260" width="260" height="260"
+     class="rounded-full shadow-inner" aria-label="วงล้อสุ่มรางวัล"></svg>
             </div>
 
             <div id="resultPrizeBox" class="hidden bg-red-950/90 border border-red-500 p-2.5 rounded-xl mb-1 animate-bounce shadow-lg">
@@ -834,88 +840,133 @@
     ];
 
     function drawWheel() {
-      const canvas = document.getElementById('wheelCanvas');
-      if (!canvas) return;
+      const svg = document.getElementById('wheelCanvas');
+      if (!svg) return;
 
-      const ctx = canvas.getContext('2d');
-      const size = canvas.width;
-      const center = size / 2;
-      const radius = center - 2;
-      const arc = (2 * Math.PI) / prizes.length;
+      const NS = "http://www.w3.org/2000/svg";
+      const size = 260;
+      const center = 130;
+      const radius = 126;
+      const textRadius = 78;
+      const arc = (Math.PI * 2) / prizes.length;
 
-      ctx.clearRect(0, 0, size, size);
+      svg.innerHTML = "";
 
-      // วาดวงล้อ
+      // พื้นหลัง/ขอบวงล้อ
+      const outer = document.createElementNS(NS, "circle");
+      outer.setAttribute("cx", center);
+      outer.setAttribute("cy", center);
+      outer.setAttribute("r", radius);
+      outer.setAttribute("fill", "#140104");
+      outer.setAttribute("stroke", "#ff2222");
+      outer.setAttribute("stroke-width", "4");
+      svg.appendChild(outer);
+
+      function polar(cx, cy, r, angle) {
+        return {
+          x: cx + r * Math.cos(angle),
+          y: cy + r * Math.sin(angle)
+        };
+      }
+
       for (let i = 0; i < prizes.length; i++) {
-        const start = i * arc;
-        const end = (i + 1) * arc;
+        const a0 = i * arc - Math.PI / 2;
+        const a1 = (i + 1) * arc - Math.PI / 2;
 
-        ctx.beginPath();
-        ctx.fillStyle = colors[i];
-        ctx.moveTo(center, center);
-        ctx.arc(center, center, radius, start, end);
-        ctx.closePath();
-        ctx.fill();
+        const p0 = polar(center, center, radius, a0);
+        const p1 = polar(center, center, radius, a1);
 
-        ctx.strokeStyle = "rgba(255, 51, 51, 0.9)";
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        const path = document.createElementNS(NS, "path");
+        const largeArc = arc > Math.PI ? 1 : 0;
+        path.setAttribute(
+          "d",
+          `M ${center} ${center} L ${p0.x} ${p0.y} A ${radius} ${radius} 0 ${largeArc} 1 ${p1.x} ${p1.y} Z`
+        );
+        path.setAttribute("fill", colors[i]);
+        path.setAttribute("stroke", "#ff4a4a");
+        path.setAttribute("stroke-width", "2");
+        svg.appendChild(path);
 
-        // ===== ข้อความในแต่ละช่อง =====
-        ctx.save();
-        ctx.translate(center, center);
+        // ตำแหน่งและมุมของข้อความ
+        let mid = (a0 + a1) / 2;
+        let deg = mid * 180 / Math.PI;
 
-        // หมุนข้อความให้อยู่ตามแนวรัศมีของช่อง
-        ctx.rotate(start + arc / 2);
-
-        ctx.fillStyle = "#ffffff";
-        ctx.font = 'bold 10px "Kanit", sans-serif';
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.shadowColor = "rgba(0,0,0,0.95)";
-        ctx.shadowBlur = 4;
-
-        // วางข้อความเข้ามาด้านใน ไม่ชิดขอบ
-        const textRadius = 67;
-        const maxWidth = 68;
-
-        // ตัดข้อความเป็น 2 บรรทัดถ้ายาวเกินไป
-        const words = prizes[i].split(" ");
-        const lines = [];
-        let line = "";
-
-        for (const word of words) {
-          const testLine = line ? line + " " + word : word;
-          if (ctx.measureText(testLine).width > maxWidth && line) {
-            lines.push(line);
-            line = word;
-          } else {
-            line = testLine;
-          }
+        // ให้ตัวหนังสืออ่านตรง แม้จะอยู่ฝั่งซ้ายของวงล้อ
+        let textAngle = deg + 90;
+        if (textAngle > 90 && textAngle < 270) {
+          textAngle += 180;
         }
-        if (line) lines.push(line);
 
-        // จำกัดไม่ให้เกิน 2 บรรทัด
-        const visibleLines = lines.slice(0, 2);
-        const lineHeight = 12;
-        const startY = -((visibleLines.length - 1) * lineHeight) / 2;
+        const tx = center + textRadius * Math.cos(mid);
+        const ty = center + textRadius * Math.sin(mid);
 
-        visibleLines.forEach((text, lineIndex) => {
-          ctx.fillText(text, textRadius, startY + lineIndex * lineHeight);
+        const text = document.createElementNS(NS, "text");
+        text.setAttribute("x", tx);
+        text.setAttribute("y", ty);
+        text.setAttribute("fill", "#ffffff");
+        text.setAttribute("font-family", "Kanit, sans-serif");
+        text.setAttribute("font-size", "12");
+        text.setAttribute("font-weight", "700");
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("dominant-baseline", "middle");
+        text.setAttribute("paint-order", "stroke");
+        text.setAttribute("stroke", "#000000");
+        text.setAttribute("stroke-width", "2.5");
+        text.setAttribute("stroke-linejoin", "round");
+        text.setAttribute(
+          "transform",
+          `rotate(${textAngle} ${tx} ${ty})`
+        );
+
+        // แบ่งข้อความยาวเป็น 2 บรรทัด
+        let label = prizes[i];
+        let lines = [];
+
+        if (label.includes(" ")) {
+          const words = label.split(" ");
+          let line1 = "";
+          let line2 = "";
+
+          for (const word of words) {
+            const test = line1 ? line1 + " " + word : word;
+            if (test.length <= 9 || !line1) {
+              line1 = test;
+            } else {
+              line2 = line2 ? line2 + " " + word : word;
+            }
+          }
+
+          lines = line2 ? [line1, line2] : [line1];
+        } else {
+          lines = [label];
+        }
+
+        lines.forEach((line, index) => {
+          const tspan = document.createElementNS(NS, "tspan");
+          tspan.setAttribute("x", tx);
+          tspan.setAttribute("dy", index === 0
+            ? (lines.length === 1 ? "0" : "-6")
+            : "12");
+          tspan.textContent = line;
+          text.appendChild(tspan);
         });
 
-        ctx.restore();
+        svg.appendChild(text);
       }
+
+      // จุดกลางวงล้อ
+      const hub = document.createElementNS(NS, "circle");
+      hub.setAttribute("cx", center);
+      hub.setAttribute("cy", center);
+      hub.setAttribute("r", "10");
+      hub.setAttribute("fill", "#ff1a1a");
+      hub.setAttribute("stroke", "#ffffff");
+      hub.setAttribute("stroke-width", "2");
+      svg.appendChild(hub);
     }
 
-    async function showWheelSection() {
+    function showWheelSection() {
       document.getElementById('wheelContainer').classList.remove('hidden');
-
-      // รอ Kanit ให้โหลดก่อนวาดข้อความลง canvas
-      if (document.fonts && document.fonts.ready) {
-        await document.fonts.ready;
-      }
-
       drawWheel();
       confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
     }
