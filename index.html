@@ -92,6 +92,15 @@
       -webkit-backdrop-filter: blur(16px);
       border: 1.5px solid rgba(255, 0, 85, 0.7);
       box-shadow: 0 0 35px rgba(255, 0, 85, 0.4), inset 0 0 15px rgba(255, 0, 85, 0.2);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .cyber-terminal-card::-webkit-scrollbar {
+      width: 4px;
+    }
+    .cyber-terminal-card::-webkit-scrollbar-thumb {
+      background: rgba(255, 0, 85, 0.5);
+      border-radius: 4px;
     }
 
     .flame { transform-origin: center bottom; animation: flicker 0.2s infinite alternate ease-in-out; }
@@ -123,11 +132,9 @@
 
   <!-- CONTROLS HEADER (MUTE BUTTON & ADMIN LOCK) -->
   <div class="fixed top-4 right-4 z-50 flex items-center gap-2">
-    <!-- ปุ่ม เปิด/ปิด เพลงพื้นหลัง -->
     <button id="musicToggleBtn" onclick="toggleMusic()" class="bg-black/40 border border-white/20 rounded-full p-2.5 text-white/70 hover:text-pink-400 text-xs backdrop-blur-md transition-all active:scale-95">
       <i id="musicIcon" class="fa-solid fa-volume-high text-pink-400"></i>
     </button>
-    <!-- ปุ่มแอดมิน -->
     <button onclick="toggleAdminModal()" class="bg-black/40 border border-white/20 rounded-full p-2.5 text-white/40 hover:text-pink-400 text-xs backdrop-blur-md transition-all">
       <i class="fa-solid fa-lock"></i>
     </button>
@@ -256,7 +263,7 @@
         <div class="flex items-center justify-center gap-2 text-white font-mono text-xs font-bold tracking-wider">
           <span class="animate-ping text-red-200">⚠️</span>
           <span>SYSTEM SELF-DESTRUCT IN: <span id="countdownSec" class="text-amber-300 text-sm font-bold">15</span>s</span>
-          <span class="animate-ping text-red-200">⚠️</span>
+          <span class="animate-ping text-red-200">⚠️️</span>
         </div>
       </div>
 
@@ -362,9 +369,9 @@
             <h3 class="text-red-500 font-mali font-bold text-xs mb-0.5 glow-text-pink">🎉 ยินดีด้วย! ปลดล็อกสำเร็จ! 🎉</h3>
             <p class="text-[10px] text-red-200/80 font-kanit mb-3">หมุนวงล้อรับรางวัลพิเศษจากแฮกเกอร์!</p>
 
-            <div class="relative w-56 h-56 mx-auto mb-4 flex items-center justify-center red-cyber-frame rounded-full p-1.5">
-              <div class="absolute -top-4 z-40 text-red-500 text-3xl drop-shadow-[0_0_12px_#ff0000] animate-bounce">▼</div>
-              <canvas id="wheelCanvas" width="220" height="220" class="rounded-full shadow-inner"></canvas>
+            <div class="relative w-44 h-44 mx-auto mb-3 flex items-center justify-center red-cyber-frame rounded-full p-1.5">
+              <div class="absolute -top-3 z-40 text-red-500 text-2xl drop-shadow-[0_0_12px_#ff0000] animate-bounce">▼</div>
+              <canvas id="wheelCanvas" width="170" height="170" class="rounded-full shadow-inner"></canvas>
             </div>
 
             <div id="resultPrizeBox" class="hidden bg-red-950/90 border border-red-500 p-2.5 rounded-xl mb-1 animate-bounce shadow-lg">
@@ -417,15 +424,9 @@
   </div>
 
   <script>
-    /* =========================================================
-       👇 ใส่ชื่อไฟล์เสียง MP3 ของมึงตรงนี้ได้เลยครับ
-       ========================================================= */
     const SOUND_FILES = {
-      // --- 🎵 เพลงพื้นหลัง (BGM) ---
-      bgmNormal: 'bg_music.mp3',   // เพลงหน้าปกติ
-      bgmHacked: 'hack_music.mp3', // เพลงหน้าโดนแฮก
-
-      // --- 🔔 ซาวด์เอฟเฟกต์ (SFX) ---
+      bgmNormal: 'bg_music.mp3',
+      bgmHacked: 'hack_music.mp3',
       click: 'click.mp3',       
       giftOpen: '',             
       blowCandle: 'blow.mp3',   
@@ -437,47 +438,32 @@
       saltFail: 'fail.mp3'      
     };
 
-    /* ==========================================
-       AUDIO & BGM SYSTEM (มี Mute / Unmute & BGM Switch)
-       ========================================== */
     let currentBgm = null;
     let isMuted = false;
 
     function playBGM(type) {
       const fileName = SOUND_FILES[type];
       if (!fileName || fileName.trim() === '') return;
-
-      // หยุดเพลงเดิมถ้าเล่นอยู่
       if (currentBgm) {
         currentBgm.pause();
         currentBgm.currentTime = 0;
       }
-
       currentBgm = new Audio(fileName);
       currentBgm.loop = true;
       currentBgm.volume = 0.5;
       currentBgm.muted = isMuted;
-
-      currentBgm.play().catch(e => {
-        console.log("Autoplay blocked, click button to play sound.");
-      });
+      currentBgm.play().catch(() => {});
     }
 
     function toggleMusic() {
       isMuted = !isMuted;
       const icon = document.getElementById('musicIcon');
-
-      if (currentBgm) {
-        currentBgm.muted = isMuted;
-      }
-
+      if (currentBgm) currentBgm.muted = isMuted;
       if (isMuted) {
         icon.className = "fa-solid fa-volume-xmark text-gray-400";
       } else {
         icon.className = "fa-solid fa-volume-high text-pink-400";
-        if (currentBgm && currentBgm.paused) {
-          currentBgm.play().catch(() => {});
-        }
+        if (currentBgm && currentBgm.paused) currentBgm.play().catch(() => {});
       }
       playSound('click');
     }
@@ -494,13 +480,9 @@
       }
     }
 
-    /* ==========================================
-       MAIN SCRIPT LOGIC
-       ========================================== */
     let currentStep = 1;
 
     function startAppAndGoToStep2() {
-      // แตะเปิดปุ่มแรกเพื่อ Unlock เพลงพื้นหลังหน้าปกติ
       playBGM('bgmNormal');
       goToStep(2);
     }
@@ -669,8 +651,6 @@
     function triggerExtremeCyberHack() {
       clearInterval(destructInterval);
       playSound('glitchSiren');
-      
-      // สลับเพลงพื้นหลังเป็น BGM หน้าโดนแฮก
       playBGM('bgmHacked');
 
       const body = document.getElementById('mainBody');
@@ -724,7 +704,6 @@
       document.getElementById('hackerLetterContent').classList.remove('hidden');
     }
 
-    /* GAME LOGIC WITH 5 LIVES & TEST PASSCODE 0000 */
     let secretPasscode = 0;
     let gameTimeLeft = 25;
     let gameTimerInterval = null;
@@ -734,7 +713,7 @@
       const container = document.getElementById('livesContainer');
       let heartsText = "";
       for (let i = 0; i < 5; i++) {
-        heartsText += i < playerLives ? "❤️ " : "🖤 ";
+        heartsText += i < playerLives ? "❤ " : "🖤 ";
       }
       container.innerText = heartsText.trim();
     }
@@ -840,7 +819,6 @@
       setTimeout(() => body.classList.remove('glitch-intense'), 1000);
     }
 
-    /* WHEEL OF FORTUNE (RED CYBER THEME) */
     const prizes = [
       "ให้ตัง 500 💸", 
       "กินหมาล่า 🍲", 
@@ -852,13 +830,7 @@
     ];
     
     const colors = [
-      "#b30000",
-      "#1a0307",
-      "#3b4252",
-      "#e60000",
-      "#1a0307",
-      "#990000",
-      "#1a0307"
+      "#b30000", "#1a0307", "#3b4252", "#e60000", "#1a0307", "#990000", "#1a0307"
     ];
 
     function drawWheel() {
@@ -867,27 +839,27 @@
       const ctx = canvas.getContext('2d');
       const arc = (2 * Math.PI) / prizes.length;
 
-      ctx.clearRect(0, 0, 220, 220);
+      ctx.clearRect(0, 0, 170, 170);
       for (let i = 0; i < prizes.length; i++) {
         ctx.beginPath();
         ctx.fillStyle = colors[i];
-        ctx.moveTo(110, 110);
-        ctx.arc(110, 110, 110, i * arc, (i + 1) * arc);
+        ctx.moveTo(85, 85);
+        ctx.arc(85, 85, 85, i * arc, (i + 1) * arc);
         ctx.fill();
 
         ctx.strokeStyle = "rgba(255, 51, 51, 0.8)";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
 
         ctx.save();
-        ctx.translate(110, 110);
+        ctx.translate(85, 85);
         ctx.rotate(i * arc + arc / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 11px Kanit";
+        ctx.font = "bold 10px Kanit";
         ctx.shadowColor = "#000000";
-        ctx.shadowBlur = 5;
-        ctx.fillText(prizes[i], 102, 4);
+        ctx.shadowBlur = 4;
+        ctx.fillText(prizes[i], 78, 3);
         ctx.restore();
       }
     }
