@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin • Birthday Wish</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: #fff;
+      font-family: 'Kanit', sans-serif;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(100, 0, 20, .55), transparent 35%),
+        radial-gradient(circle at 50% 100%, rgba(255, 0, 40, .12), transparent 45%),
+        #050204;
+      overflow-x: hidden;
+    }
+
+    .matrix {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .14;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .matrix span {
+      position: absolute;
+      top: -120%;
+      color: #ff1f3d;
+      font: 12px/1.15 'Share Tech Mono', monospace;
+      writing-mode: vertical-rl;
+      animation: rain linear infinite;
+    }
+
+    @keyframes rain {
+      from { transform: translateY(-20vh); }
+      to   { transform: translateY(140vh); }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(92%, 520px);
+      margin: 0 auto;
+      padding: 42px 0 60px;
+    }
+
+    .top {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .shield {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 12px;
+      display: grid;
+      place-items: center;
+      border: 2px solid #ff293f;
+      border-radius: 22px;
+      color: #ff334d;
+      font-size: 30px;
+      box-shadow:
+        0 0 25px rgba(255, 0, 45, .45),
+        inset 0 0 20px rgba(255, 0, 45, .15);
+    }
+
+    h1 {
+      margin: 0;
+      color: #ff3a4e;
+      font-size: 25px;
+      text-shadow: 0 0 15px rgba(255, 0, 50, .7);
+    }
+
+    .subtitle {
+      margin: 5px 0 0;
+      color: rgba(255,255,255,.55);
+      font: 12px 'Share Tech Mono', monospace;
+      letter-spacing: 1px;
+    }
+
+    .card {
+      background: rgba(13, 3, 7, .9);
+      border: 1px solid rgba(255, 35, 60, .55);
+      border-radius: 25px;
+      padding: 22px;
+      box-shadow:
+        0 0 35px rgba(255, 0, 40, .18),
+        inset 0 0 25px rgba(255, 0, 40, .05);
+      backdrop-filter: blur(14px);
+    }
+
+    .login-title,
+    .wish-title {
+      color: #ff4c5d;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px 15px;
+      border-radius: 13px;
+      border: 1px solid rgba(255, 50, 70, .55);
+      outline: none;
+      background: #050204;
+      color: #fff;
+      text-align: center;
+      font-family: 'Kanit', sans-serif;
+      font-size: 14px;
+    }
+
+    input:focus {
+      border-color: #ff344d;
+      box-shadow: 0 0 15px rgba(255, 0, 40, .22);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 11px;
+      padding: 13px;
+      border: 0;
+      border-radius: 13px;
+      cursor: pointer;
+      color: white;
+      font-family: 'Kanit', sans-serif;
+      font-weight: 600;
+      background: linear-gradient(135deg, #d90024, #ff293f, #a8001d);
+      box-shadow: 0 8px 22px rgba(255, 0, 40, .25);
+    }
+
+    button:active {
+      transform: scale(.98);
+    }
+
+    .error {
+      min-height: 20px;
+      margin-top: 9px;
+      color: #ff7180;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 15px;
+      color: #7dff9c;
+      font: 11px 'Share Tech Mono', monospace;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #37ff6a;
+      box-shadow: 0 0 12px #37ff6a;
+    }
+
+    .wish-box {
+      min-height: 180px;
+      padding: 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 190, 60, .3);
+      background: rgba(0,0,0,.42);
+      box-shadow: inset 0 0 25px rgba(255, 0, 40, .06);
+    }
+
+    #wishText {
+      margin: 0;
+      color: #ffe8a3;
+      font-size: 17px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .empty {
+      color: rgba(255,255,255,.45) !important;
+      text-align: center;
+      padding-top: 45px;
+      font-size: 13px !important;
+    }
+
+    .meta {
+      margin-top: 13px;
+      color: rgba(255,255,255,.38);
+      font: 10px 'Share Tech Mono', monospace;
+      text-align: center;
+    }
+
+    .back {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: none;
+      color: rgba(255,255,255,.65);
+    }
+
+    .warning {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 13px;
+      background: rgba(255, 120, 0, .07);
+      border: 1px solid rgba(255, 160, 50, .18);
+      color: rgba(255,220,170,.65);
+      font-size: 10px;
+      line-height: 1.6;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="matrix" id="matrix"></div>
+
+  <main class="page">
+    <div class="top">
+      <div class="shield">🔐</div>
+      <h1>ADMIN ACCESS</h1>
+      <p class="subtitle">PRIVATE BIRTHDAY WISH DATABASE</p>
+    </div>
+
+    <!-- LOGIN -->
+    <section id="loginCard" class="card">
+      <div class="login-title">[ SYSTEM LOGIN ]</div>
+
+      <input
+        id="adminPassword"
+        type="password"
+        placeholder="ใส่รหัสผ่านลับ..."
+        autocomplete="off"
+        onkeydown="if(event.key === 'Enter') login()"
+      >
+
+      <button onclick="login()">🔓 เข้าสู่ระบบ</button>
+
+      <div id="loginError" class="error"></div>
+    </section>
+
+    <!-- ADMIN -->
+    <section id="adminCard" class="card hidden">
+      <div class="status">
+        <span class="status-dot"></span>
+        ACCESS GRANTED — ADMIN ONLINE
+      </div>
+
+      <div class="wish-title">💌 คำขอพรของแฟน</div>
+
+      <div class="wish-box">
+        <p id="wishText" class="empty">กำลังตรวจสอบข้อมูล...</p>
+      </div>
+
+      <div id="meta" class="meta"></div>
+
+      <button onclick="refreshWish()">🔄 รีเฟรชคำขอพร</button>
+      <button class="back" onclick="location.href='index.html'">← กลับหน้าวันเกิด</button>
+
+      <div class="warning">
+        🔒 หน้านี้เป็นพื้นที่ส่วนตัว<br>
+        ข้อมูลคำขอพรถูกอ่านจากระบบของหน้าเว็บ
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const ADMIN_PASSWORD = '1234';
+    const WISH_KEY = 'hbd_secret_partner_wish';
+
+    function login() {
+      const password = document.getElementById('adminPassword').value;
+      const error = document.getElementById('loginError');
+
+      if (password === ADMIN_PASSWORD) {
+        document.getElementById('loginCard').classList.add('hidden');
+        document.getElementById('adminCard').classList.remove('hidden');
+        error.textContent = '';
+        refreshWish();
+      } else {
+        error.textContent = '⚠️ รหัสผ่านไม่ถูกต้อง';
+        document.getElementById('adminPassword').value = '';
+      }
+    }
+
+    function refreshWish() {
+      const wishText = document.getElementById('wishText');
+      const meta = document.getElementById('meta');
+      const savedWish = localStorage.getItem(WISH_KEY);
+
+      if (savedWish && savedWish.trim()) {
+        wishText.classList.remove('empty');
+        wishText.textContent = '“' + savedWish + '”';
+        meta.textContent = 'DATABASE STATUS: WISH FOUND ✓';
+      } else {
+        wishText.classList.add('empty');
+        wishText.textContent = 'ยังไม่มีคำขอพรในระบบ 💭';
+        meta.textContent = 'DATABASE STATUS: NO WISH FOUND';
+      }
+    }
+
+    // สร้างเอฟเฟกต์ Matrix เบา ๆ
+    const matrix = document.getElementById('matrix');
+    const chars = '0123456789ABCDEF#@$%&';
+    for (let i = 0; i < 34; i++) {
+      const span = document.createElement('span');
+      span.textContent = Array.from({length: 35}, () =>
+        chars[Math.floor(Math.random() * chars.length)]
+      ).join('\\n');
+
+      span.style.left = Math.random() * 100 + '%';
+      span.style.animationDuration = (5 + Math.random() * 9) + 's';
+      span.style.animationDelay = (-Math.random() * 10) + 's';
+
+      matrix.appendChild(span);
+    }
+  </script>
+</body>
+</html>
